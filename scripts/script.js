@@ -1,178 +1,78 @@
-let headerBurger = $(".header__burger");
-let menu = $(".menu");
-let menuCover = $(".menu__cover");
-let burger_first = $(".header__open-menu:first-child");
-let burger_last = $(".header__open-menu:last-child");
-let burger_center = $(".header__open-menu:nth-child(2)");
+let catalogBtn = $('.catalog__btn');
+let catalogProduct = $('.catalog__product');
 
-function showHideMenu () {
-    menu.toggle();
-    menuCover.toggle();
-    burger_first.toggleClass("bias_first");
-    burger_last.toggleClass("bias_last");
-    burger_center.toggleClass("bias_center");
-    $("html").toggleClass("scroll");
+catalogBtn.on('click', function () {
+	let buttonIndex = catalogBtn.index(this);
+    catalogProduct.hide();
+    catalogBtn.css('background','rgb(243, 243, 243)');
+    catalogBtn.css('color','rgb(30, 30, 30)');
+    catalogBtn.eq(buttonIndex).css('background','rgb(186, 1, 82)');
+    catalogBtn.eq(buttonIndex).css('color','rgb(255, 255, 255)');
+    catalogProduct.eq(buttonIndex).css('display','flex');
+});
+
+catalogProduct.on('click', function (e) {
+	let target = $(e.target);
+
+	if (target.hasClass('product__size') && !target.hasClass('activeSize')) {
+		productSize(target);
+	}
+	else if (target.hasClass('product__color') && !target.hasClass('.colorActive"')) {
+		productColor(target);
+	}
+	else if (target.hasClass('product__button')) {
+		productInfo(target);
+	}
+});
+
+let productSize = function (target) {
+	$('.activeSize').removeClass('activeSize');
+	target.addClass('activeSize');
 }
 
-headerBurger.on("click", function () {
-    showHideMenu ()
+let productColor = function (target) {
+	$('.colorActive').removeClass('colorActive');
+	target.addClass('colorActive');
+}
+
+let productInfo = function (target) {
+	let popup = $('.popup');
+	let	selectProduct = target.closest('.product');
+
+	let TitleInfo = selectProduct.find(".product__title").text();
+	let PriceInfo = selectProduct.find('.product__price-main').text();
+	let ImgSrcInfo = selectProduct.find('.product__background').attr('src');
+	let RowSizeInfo = CheckAndSelectSizeActive(selectProduct);
+	let ColorInfo = CheckAndSelectColorActive(selectProduct);
+
+	popup.find('.order-info-title').attr('value', TitleInfo);
+	popup.find('.order-info-price').attr('value', PriceInfo );
+	popup.find('.order-info-size').attr('value', RowSizeInfo);
+	popup.find('.order-info-color').attr('value', ColorInfo);
+
+	popup.find('.popup__info-title').text(TitleInfo);
+	popup.find('.popup__info-price').text(PriceInfo );
+	popup.find('.popup__info-size').text(RowSizeInfo);
+	popup.find('.popup__info-color').attr('style', ColorInfo);
+	popup.find('.popup__info-img').attr('src', ImgSrcInfo);
+}
+
+let CheckAndSelectSizeActive = function(selectProduct) {
+	if (selectProduct.find('.activeSize').length == 0) {
+		$('.activeSize').removeClass('activeSize');
+		selectProduct.find('.product__size').eq(0).addClass('activeSize');
+	}
+	return selectProduct.find('.activeSize').text();
+}
+
+let CheckAndSelectColorActive = function(selectProduct) {
+	if (selectProduct.find('.colorActive').length == 0) {
+		$('.colorActive').removeClass('colorActive');
+		selectProduct.find('.product__color').eq(0).addClass('colorActive');
+	}
+	return selectProduct.find('.colorActive').attr('style');
+}
+
+$(function(){
+    $("#phone").mask("+7 (999) 999-9999");
 });
-menuCover.on("click", function () {
-    showHideMenu ()
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Dynamic Adapt v.1
-// HTML data-da="where(uniq class name),position(digi),when(breakpoint)"
-// e.x. data-da="item,2,992"
-// Andrikanych Yevhen 2020
-// https://www.youtube.com/c/freelancerlifestyle
-
-"use strict";
-
-(function () {
-	let originalPositions = [];
-	let daElements = document.querySelectorAll('[data-da]');
-	let daElementsArray = [];
-	let daMatchMedia = [];
-	//Заполняем массивы
-	if (daElements.length > 0) {
-		let number = 0;
-		for (let index = 0; index < daElements.length; index++) {
-			const daElement = daElements[index];
-			const daMove = daElement.getAttribute('data-da');
-			if (daMove != '') {
-				const daArray = daMove.split(',');
-				const daPlace = daArray[1] ? daArray[1].trim() : 'last';
-				const daBreakpoint = daArray[2] ? daArray[2].trim() : '767';
-				const daType = daArray[3] === 'min' ? daArray[3].trim() : 'max';
-				const daDestination = document.querySelector('.' + daArray[0].trim())
-				if (daArray.length > 0 && daDestination) {
-					daElement.setAttribute('data-da-index', number);
-					//Заполняем массив первоначальных позиций
-					originalPositions[number] = {
-						"parent": daElement.parentNode,
-						"index": indexInParent(daElement)
-					};
-					//Заполняем массив элементов 
-					daElementsArray[number] = {
-						"element": daElement,
-						"destination": document.querySelector('.' + daArray[0].trim()),
-						"place": daPlace,
-						"breakpoint": daBreakpoint,
-						"type": daType
-					}
-					number++;
-				}
-			}
-		}
-		dynamicAdaptSort(daElementsArray);
-
-		//Создаем события в точке брейкпоинта
-		for (let index = 0; index < daElementsArray.length; index++) {
-			const el = daElementsArray[index];
-			const daBreakpoint = el.breakpoint;
-			const daType = el.type;
-
-			daMatchMedia.push(window.matchMedia("(" + daType + "-width: " + daBreakpoint + "px)"));
-			daMatchMedia[index].addListener(dynamicAdapt);
-		}
-	}
-	//Основная функция
-	function dynamicAdapt(e) {
-		for (let index = 0; index < daElementsArray.length; index++) {
-			const el = daElementsArray[index];
-			const daElement = el.element;
-			const daDestination = el.destination;
-			const daPlace = el.place;
-			const daBreakpoint = el.breakpoint;
-			const daClassname = "_dynamic_adapt_" + daBreakpoint;
-
-			if (daMatchMedia[index].matches) {
-				//Перебрасываем элементы
-				if (!daElement.classList.contains(daClassname)) {
-					let actualIndex = indexOfElements(daDestination)[daPlace];
-					if (daPlace === 'first') {
-						actualIndex = indexOfElements(daDestination)[0];
-					} else if (daPlace === 'last') {
-						actualIndex = indexOfElements(daDestination)[indexOfElements(daDestination).length];
-					}
-					daDestination.insertBefore(daElement, daDestination.children[actualIndex]);
-					daElement.classList.add(daClassname);
-				}
-			} else {
-				//Возвращаем на место
-				if (daElement.classList.contains(daClassname)) {
-					dynamicAdaptBack(daElement);
-					daElement.classList.remove(daClassname);
-				}
-			}
-		}
-		customAdapt();
-	}
-
-	//Вызов основной функции
-	dynamicAdapt();
-
-	//Функция возврата на место
-	function dynamicAdaptBack(el) {
-		const daIndex = el.getAttribute('data-da-index');
-		const originalPlace = originalPositions[daIndex];
-		const parentPlace = originalPlace['parent'];
-		const indexPlace = originalPlace['index'];
-		const actualIndex = indexOfElements(parentPlace, true)[indexPlace];
-		parentPlace.insertBefore(el, parentPlace.children[actualIndex]);
-	}
-	//Функция получения индекса внутри родителя
-	function indexInParent(el) {
-		var children = Array.prototype.slice.call(el.parentNode.children);
-		return children.indexOf(el);
-	}
-	//Функция получения массива индексов элементов внутри родителя 
-	function indexOfElements(parent, back) {
-		const children = parent.children;
-		const childrenArray = [];
-		for (let i = 0; i < children.length; i++) {
-			const childrenElement = children[i];
-			if (back) {
-				childrenArray.push(i);
-			} else {
-				//Исключая перенесенный элемент
-				if (childrenElement.getAttribute('data-da') == null) {
-					childrenArray.push(i);
-				}
-			}
-		}
-		return childrenArray;
-	}
-	//Сортировка объекта
-	function dynamicAdaptSort(arr) {
-		arr.sort(function (a, b) {
-			if (a.breakpoint > b.breakpoint) { return -1 } else { return 1 }
-		});
-		arr.sort(function (a, b) {
-			if (a.place > b.place) { return 1 } else { return -1 }
-		});
-	}
-	//Дополнительные сценарии адаптации
-	function customAdapt() {
-		//const viewport_width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-	}
-}());
