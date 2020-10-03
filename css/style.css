@@ -925,7 +925,7 @@ img {
   }
   .help-info__columns:before {
     width: 49%;
-    margin-top: 155px;
+    margin-top: 310px;
   }
   .help-info__columns:after {
     content: '';
